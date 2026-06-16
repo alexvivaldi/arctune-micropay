@@ -1,5 +1,7 @@
 # ArcTune
 
+**Live site:** https://arctune.vercel.app
+
 ArcTune is a USDC micropayment music platform built for **Arc Testnet** (Chain ID `5042002`).
 
 Listeners pay **$0.05 USDC** per stream. The smart contract splits the payment instantly between the artist, producer, and collaborators — no labels, no platform middlemen, no delayed royalties.
@@ -57,6 +59,16 @@ The frontend will be at `http://localhost:3000` and the local node at `http://12
 
 ## Deploy to Arc Testnet
 
+### Option A — deploy from the UI (recommended)
+
+1. Open https://arctune.vercel.app.
+2. Connect your wallet on Arc Testnet.
+3. Click **Deploy MicroTune contract** and sign the transaction.
+4. Copy the deployed contract address and set it as `NEXT_PUBLIC_CONTRACT_ADDRESS` in your Vercel env / `frontend/.env.local`.
+5. Rebuild / redeploy the frontend.
+
+### Option B — deploy via Hardhat
+
 1. Copy `.env.example` to `.env` in the project root and to `frontend/.env.local`.
 2. Fill in your **wallet private key** and **WalletConnect project ID**.
 3. Run the deploy script:
@@ -66,7 +78,7 @@ npm run deploy --workspace=contracts
 ```
 
 4. The script prints the deployed contract address and saves it to `contracts/deployments/arctestnet.json`.
-5. Set the contract address as `NEXT_PUBLIC_CONTRACT_ADDRESS` in `frontend/.env.local`:
+5. Set the contract address as `NEXT_PUBLIC_CONTRACT_ADDRESS`:
 
 ```env
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x...your_deployed_address...
