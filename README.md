@@ -1,6 +1,12 @@
 # ArcTune
 
-**Live site:** https://arctune.vercel.app
+<p align="center">
+  <img src="frontend/public/logo.svg" alt="ArcTune" width="120" />
+</p>
+
+<p align="center">
+  <strong>Live site:</strong> <a href="https://arctune.vercel.app">https://arctune.vercel.app</a>
+</p>
 
 ArcTune is a USDC micropayment music platform built for **Arc Testnet** (Chain ID `5042002`).
 
