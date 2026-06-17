@@ -1,0 +1,24 @@
+{
+  "name": "arctune-micropay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ArcTune — USDC micropayment music platform for Arc Testnet",
+  "workspaces": [
+    "contracts",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend",
+    "lint": "npm run lint --workspace=frontend && npm run lint --workspace=contracts",
+    "typecheck": "npm run typecheck --workspace=frontend && npm run typecheck --workspace=contracts",
+    "compile": "npm run compile --workspace=contracts",
+    "test:contracts": "npm run test --workspace=contracts",
+    "test:frontend": "npm run test --workspace=frontend",
+    "deploy": "npm run deploy --workspace=contracts"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}

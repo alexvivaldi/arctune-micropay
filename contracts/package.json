@@ -1,0 +1,25 @@
+{
+  "name": "@arctune/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "typecheck": "tsc --noEmit",
+    "lint": "solhint \"contracts/**/*.sol\"",
+    "deploy": "hardhat run scripts/deploy.ts --network arctestnet",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "node": "hardhat node"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^20.14.10",
+    "hardhat": "^2.22.6",
+    "solhint": "^5.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}
