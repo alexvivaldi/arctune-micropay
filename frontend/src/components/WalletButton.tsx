@@ -3,11 +3,14 @@
 import { useAccount, useDisconnect } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { formatAddress } from "@/lib/format";
+import { useUsdcBalance } from "@/hooks/useMicroTune";
+import { formatUnits } from "viem";
 
 export function WalletButton() {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
+  const { data: balance } = useUsdcBalance();
 
   if (!isConnected || !address) {
     return (
@@ -23,7 +26,12 @@ export function WalletButton() {
   return (
     <div className="flex items-center gap-3 border-2 border-white px-4 py-2">
       <div className="h-6 w-6 bg-white" />
-      <span className="font-mono text-sm uppercase">{formatAddress(address)}</span>
+      <div className="flex flex-col items-start leading-none">
+        <span className="font-mono text-sm uppercase">{formatAddress(address)}</span>
+        <span className="font-mono text-xs text-gray-400">
+          {balance !== undefined ? `${formatUnits(balance, 18)} USDC` : "—"}
+        </span>
+      </div>
       <button
         onClick={() => disconnect()}
         className="ml-2 border-l-2 border-white pl-3 text-xs font-bold uppercase text-gray-400 transition hover:text-white"

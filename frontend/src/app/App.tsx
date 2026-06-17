@@ -45,6 +45,19 @@ export default function App() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
+        {/* Hero / intro */}
+        <section className="mb-8 border-2 border-white bg-black p-6">
+          <h2 className="mb-2 text-xl font-bold uppercase tracking-tight">
+            Pay artists directly. No labels. No middlemen.
+          </h2>
+          <p className="max-w-3xl text-sm leading-relaxed text-gray-400">
+            ArcTune is a micro-payment music layer on Arc Testnet. Listeners pay
+            <strong className="text-white"> 0.05 USDC </strong>
+            per stream. The smart contract instantly splits the payment between the artist,
+            producer and collaborators — in real time, on-chain.
+          </p>
+        </section>
+
         {!isConnected ? (
           <div className="flex flex-col items-center justify-center border-2 border-white bg-black px-8 py-24 text-center">
             <h2 className="mb-4 text-3xl font-bold uppercase">Connect wallet</h2>
