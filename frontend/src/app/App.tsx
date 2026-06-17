@@ -12,6 +12,18 @@ import { Track } from "@/types/track";
 import { useMicroTuneConfigured } from "@/hooks/useMicroTune";
 import { DeployContract } from "@/components/DeployContract";
 
+function FeatureCard({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="border-2 border-white bg-black p-4">
+      <div className="mb-3 flex h-8 w-8 items-center justify-center border border-white text-white">
+        <Image src={icon} alt="" width={20} height={20} />
+      </div>
+      <h3 className="mb-2 text-sm font-bold uppercase tracking-widest">{title}</h3>
+      <p className="text-xs leading-relaxed text-gray-400">{children}</p>
+    </div>
+  );
+}
+
 export default function App() {
   const { isConnected } = useAccount();
   const [selected, setSelected] = useState<Track | null>(null);
@@ -56,6 +68,27 @@ export default function App() {
             per stream. The smart contract instantly splits the payment between the artist,
             producer and collaborators — in real time, on-chain.
           </p>
+        </section>
+
+        {/* Why Arc */}
+        <section className="mb-8">
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-gray-400">
+            Why Arc Testnet
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <FeatureCard icon="/agent.svg" title="Agents as users">
+              The agent player and royalty bot sign real transactions and read contract state directly — no backend needed.
+            </FeatureCard>
+            <FeatureCard icon="/logo.svg" title="Native USDC gas">
+              Gas and payments are both in USDC. No ETH wrapping, no swaps, no double-denomination friction.
+            </FeatureCard>
+            <FeatureCard icon="/bot.svg" title="Micro payments work">
+              Low fees make $0.05 streams economically viable. Every listen pays out immediately.
+            </FeatureCard>
+            <FeatureCard icon="/agent.svg" title="EVM compatible">
+              MetaMask, Viem, Wagmi, Hardhat — all existing tools work out of the box.
+            </FeatureCard>
+          </div>
         </section>
 
         {!isConnected ? (

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useWatchContractEvent, useReadContract } from "wagmi";
+import Image from "next/image";
 import { MICROTUNE_ABI, getMicroTuneAddress } from "@/lib/contract";
 import { Track } from "@/types/track";
 import { formatUnits } from "viem";
@@ -56,7 +57,12 @@ export function RoyaltyBot({ track }: RoyaltyBotProps) {
   return (
     <div className="border-2 border-white bg-black">
       <div className="flex items-center justify-between border-b-2 border-white px-4 py-3">
-        <h2 className="text-sm font-bold uppercase tracking-widest">Royalty Bot</h2>
+        <div className="flex items-center gap-3">
+          <div className="flex h-6 w-6 items-center justify-center border border-white">
+            <Image src="/bot.svg" alt="" width={16} height={16} />
+          </div>
+          <h2 className="text-sm font-bold uppercase tracking-widest">Royalty Bot</h2>
+        </div>
         <span className="border border-white px-2 py-1 text-xs font-bold uppercase tracking-widest">
           Live
         </span>

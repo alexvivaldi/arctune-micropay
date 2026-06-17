@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import {
   useApproveUsdc,
   useListen,
@@ -82,7 +83,10 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
 
   return (
     <div className="border-2 border-white bg-black">
-      <div className="border-b-2 border-white px-4 py-3">
+      <div className="flex items-center gap-3 border-b-2 border-white px-4 py-3">
+        <div className="flex h-6 w-6 items-center justify-center border border-white">
+          <Image src="/agent.svg" alt="" width={16} height={16} />
+        </div>
         <h2 className="text-sm font-bold uppercase tracking-widest">Agent Player</h2>
       </div>
       <div className="p-4">
