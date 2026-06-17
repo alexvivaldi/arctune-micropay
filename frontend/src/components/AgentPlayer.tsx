@@ -53,7 +53,10 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
   }, []);
 
   const payForListen = useCallback(() => {
-    setLog((prev) => [`Agent: paying ${formatUnits(price, 18)} USDC for #${track.id}`, ...prev].slice(0, 20));
+    setLog((prev) => [
+      `Agent: paid ${formatUnits(price, 18)} USDC for #${track.id}`,
+      ...prev,
+    ].slice(0, 20));
     listen(track.id);
     setAgentCount((c) => c + 1);
   }, [listen, price, track.id]);
@@ -78,84 +81,88 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
   const isBusy = isPending || isConfirming || isApprovePending || isApproveConfirming;
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <h2 className="mb-4 text-xl font-semibold">Agent Player</h2>
-      <div className="mb-4 flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-arc-100 text-2xl dark:bg-arc-900">
-          {playing ? "🎵" : "🎸"}
-        </div>
-        <div>
-          <p className="font-medium">{track.title}</p>
-          <p className="text-sm text-zinc-500">
-            {formatUnits(track.totalRevenue, 18)} USDC earned · {track.totalListens.toString()} listens
-          </p>
-        </div>
+    <div className="border-2 border-white bg-black">
+      <div className="border-b-2 border-white px-4 py-3">
+        <h2 className="text-sm font-bold uppercase tracking-widest">Agent Player</h2>
       </div>
-
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        {needsApproval ? (
-          <button
-            onClick={() => approve(price)}
-            disabled={isBusy || isAllowanceLoading}
-            className="rounded-lg bg-arc-600 px-4 py-2 font-medium text-white hover:bg-arc-700 disabled:opacity-50"
-          >
-            {isApprovePending || isApproveConfirming ? "Approving USDC..." : "Approve 0.05 USDC"}
-          </button>
-        ) : (
-          <button
-            onClick={() => {
-              playTone();
-              payForListen();
-            }}
-            disabled={isBusy}
-            className="rounded-lg bg-arc-600 px-4 py-2 font-medium text-white hover:bg-arc-700 disabled:opacity-50"
-          >
-            {isPending || isConfirming ? "Paying..." : "▶ Listen now (0.05 USDC)"}
-          </button>
-        )}
-
-        <button
-          onClick={() => setAuto((v) => !v)}
-          disabled={needsApproval || isBusy}
-          className={`rounded-lg px-4 py-2 font-medium transition ${
-            auto
-              ? "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400"
-              : "bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200"
-          } disabled:opacity-50`}
-        >
-          {auto ? "⏹ Stop agent" : "🤖 Run agent"}
-        </button>
-      </div>
-
-      <div className="mb-4 grid grid-cols-2 gap-4 text-sm">
-        <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
-          <p className="text-zinc-500">Agent listens</p>
-          <p className="text-lg font-semibold">{agentCount}</p>
-        </div>
-        <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
-          <p className="text-zinc-500">Wallet balance</p>
-          <p className="text-lg font-semibold">
-            {balance ? `${formatUnits(balance, 18)} USDC` : "—"}
-          </p>
-        </div>
-      </div>
-
-      {hash && (
-        <p className="mb-4 text-xs text-zinc-500">
-          Tx: {hash.slice(0, 14)}...{hash.slice(-12)}
-        </p>
-      )}
-
-      <div className="h-32 overflow-y-auto rounded-lg bg-zinc-50 p-3 text-xs dark:bg-zinc-800">
-        {log.length === 0 ? (
-          <p className="text-zinc-400">Agent logs will appear here.</p>
-        ) : (
-          log.map((entry, i) => (
-            <p key={i} className="mb-1 border-b border-zinc-100 pb-1 last:border-0 dark:border-zinc-700">
-              {entry}
+      <div className="p-4">
+        <div className="mb-6 flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center border-2 border-white bg-white text-black text-xl">
+            {playing ? "▶" : "◼"}
+          </div>
+          <div>
+            <p className="text-lg font-bold uppercase tracking-tight">{track.title}</p>
+            <p className="font-mono text-xs text-gray-400">
+              {formatUnits(track.totalRevenue, 18)} USDC · {track.totalListens.toString()} listens
             </p>
-          ))
+          </div>
+        </div>
+
+        <div className="mb-6 flex flex-wrap gap-3">
+          {needsApproval ? (
+            <button
+              onClick={() => approve(price)}
+              disabled={isBusy || isAllowanceLoading}
+              className="border-2 border-white bg-white px-6 py-3 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-black hover:text-white disabled:opacity-50"
+            >
+              {isApprovePending || isApproveConfirming ? "Approving…" : "Approve USDC"}
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                playTone();
+                payForListen();
+              }}
+              disabled={isBusy}
+              className="border-2 border-white bg-white px-6 py-3 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-black hover:text-white disabled:opacity-50"
+            >
+              {isPending || isConfirming ? "Paying…" : "Listen now — 0.05 USDC"}
+            </button>
+          )}
+
+          <button
+            onClick={() => setAuto((v) => !v)}
+            disabled={needsApproval || isBusy}
+            className={`border-2 px-6 py-3 text-sm font-bold uppercase tracking-widest transition disabled:opacity-50 ${
+              auto
+                ? "border-white bg-white text-black hover:bg-black hover:text-white"
+                : "border-white bg-black text-white hover:bg-white hover:text-black"
+            }`}
+          >
+            {auto ? "Stop agent" : "Run agent"}
+          </button>
+        </div>
+
+        <div className="mb-6 grid grid-cols-2 gap-4 border-2 border-white">
+          <div className="border-r-2 border-white p-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Agent listens</p>
+            <p className="font-mono text-xl font-bold">{agentCount}</p>
+          </div>
+          <div className="p-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Wallet balance</p>
+            <p className="font-mono text-xl font-bold">
+              {balance ? `${formatUnits(balance, 18)} USDC` : "—"}
+            </p>
+          </div>
+        </div>
+
+        {hash && (
+          <p className="mb-4 font-mono text-xs text-gray-400">
+            Tx: {hash.slice(0, 14)}…{hash.slice(-12)}
+          </p>
         )}
+
+        <div className="h-32 overflow-y-auto border-2 border-white bg-black p-3">
+          {log.length === 0 ? (
+            <p className="text-xs uppercase tracking-widest text-gray-400">Agent logs will appear here.</p>
+          ) : (
+            log.map((entry, i) => (
+              <p key={i} className="mb-1 border-b border-white/10 pb-1 font-mono text-xs last:border-0">
+                {entry}
+              </p>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

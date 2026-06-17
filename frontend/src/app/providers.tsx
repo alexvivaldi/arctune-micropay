@@ -1,4 +1,4 @@
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { getDefaultConfig, RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { defineChain, http } from "viem";
@@ -30,7 +30,7 @@ export const arcTestnet = defineChain({
 
 const config = getDefaultConfig({
   appName: "ArcTune",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "arctune-local",
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "arctune",
   chains: [arcTestnet],
   transports: {
     [arcTestnet.id]: http(),
@@ -44,7 +44,17 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>{children}</RainbowKitProvider>
+        <RainbowKitProvider
+          theme={darkTheme({
+            accentColor: "#ffffff",
+            accentColorForeground: "#000000",
+            borderRadius: "none",
+            fontStack: "system",
+            overlayBlur: "small",
+          })}
+        >
+          {children}
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

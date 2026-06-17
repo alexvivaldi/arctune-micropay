@@ -9,18 +9,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        arc: {
-          50: "#f5f7ff",
-          100: "#eef0ff",
-          200: "#dfe4ff",
-          300: "#c6cdff",
-          400: "#a3afff",
-          500: "#7f8bfa",
-          600: "#5f6bef",
-          700: "#4f55d8",
-          800: "#4146ae",
-          900: "#3a418a",
+        ink: {
+          50: "#f6f6f6",
+          100: "#e7e7e7",
+          200: "#d1d1d1",
+          300: "#b0b0b0",
+          400: "#888888",
+          500: "#6d6d6d",
+          600: "#5d5d5d",
+          700: "#4f4f4f",
+          800: "#454545",
+          900: "#3d3d3d",
+          950: "#0a0a0a",
         },
+      },
+      fontFamily: {
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "monospace"],
+      },
+      borderRadius: {
+        none: "0",
       },
     },
   },

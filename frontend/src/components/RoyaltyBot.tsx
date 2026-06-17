@@ -13,7 +13,6 @@ interface RoyaltyBotProps {
 interface SplitEntry {
   beneficiary: `0x${string}`;
   amount: bigint;
-  timestamp: number;
 }
 
 export function RoyaltyBot({ track }: RoyaltyBotProps) {
@@ -29,7 +28,6 @@ export function RoyaltyBot({ track }: RoyaltyBotProps) {
     return track.beneficiaries.map((b, i) => ({
       beneficiary: b,
       amount: (track.listenPrice * track.shares[i]) / 10000n,
-      timestamp: Date.now(),
     }));
   }, [track]);
 
@@ -37,21 +35,16 @@ export function RoyaltyBot({ track }: RoyaltyBotProps) {
     address: address ?? undefined,
     abi: MICROTUNE_ABI,
     eventName: "PaymentSplit",
-    args: {
-      trackId: track.id,
-    },
+    args: { trackId: track.id },
     enabled: Boolean(address),
     onLogs(logs) {
       for (const log of logs) {
         const typed = log as unknown as {
-          args?: {
-            beneficiary?: `0x${string}`;
-            amount?: bigint;
-          };
+          args?: { beneficiary?: `0x${string}`; amount?: bigint };
         };
         if (typed.args?.beneficiary && typed.args.amount !== undefined) {
           console.log(
-            "[RoyaltyBot] split",
+            "[RoyaltyBot]",
             typed.args.beneficiary,
             formatUnits(typed.args.amount, 18)
           );
@@ -61,40 +54,43 @@ export function RoyaltyBot({ track }: RoyaltyBotProps) {
   });
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Royalty Bot</h2>
-        <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+    <div className="border-2 border-white bg-black">
+      <div className="flex items-center justify-between border-b-2 border-white px-4 py-3">
+        <h2 className="text-sm font-bold uppercase tracking-widest">Royalty Bot</h2>
+        <span className="border border-white px-2 py-1 text-xs font-bold uppercase tracking-widest">
           Live
         </span>
       </div>
-
-      <p className="mb-4 text-sm text-zinc-500">
-        Real-time split preview for one listen of <strong>{track.title}</strong>.
-      </p>
-
-      <div className="space-y-2">
-        {entries.map((entry, i) => (
-          <div
-            key={entry.beneficiary}
-            className="flex items-center justify-between rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800"
-          >
-            <div>
-              <p className="text-xs text-zinc-500">{i === 0 ? "Artist" : i === 1 ? "Producer" : "Collaborator"}</p>
-              <p className="font-mono text-xs">{entry.beneficiary}</p>
-            </div>
-            <div className="text-right">
-              <p className="font-semibold">{formatUnits(entry.amount, 18)} USDC</p>
-              <p className="text-xs text-zinc-500">{Number(track.shares[i] / 100n)}%</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-4 rounded-lg bg-arc-50 p-3 text-sm dark:bg-arc-900/20">
-        <p>
-          Total tracks on chain: <strong>{count?.toString() ?? "—"}</strong>
+      <div className="p-4">
+        <p className="mb-4 text-xs uppercase tracking-widest text-gray-400">
+          Real-time split for one listen of <strong className="text-white">{track.title}</strong>
         </p>
+
+        <div className="space-y-2">
+          {entries.map((entry, i) => (
+            <div
+              key={entry.beneficiary}
+              className="flex items-center justify-between border-2 border-white px-3 py-2"
+            >
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                  {i === 0 ? "Artist" : i === 1 ? "Producer" : "Collaborator"}
+                </p>
+                <p className="font-mono text-xs">{entry.beneficiary}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold">{formatUnits(entry.amount, 18)} USDC</p>
+                <p className="font-mono text-xs text-gray-400">{Number(track.shares[i] / 100n)}%</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 border-2 border-white px-4 py-3">
+          <p className="text-xs uppercase tracking-widest">
+            Total tracks on chain: <strong className="font-mono">{count?.toString() ?? "—"}</strong>
+          </p>
+        </div>
       </div>
     </div>
   );

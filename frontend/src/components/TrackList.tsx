@@ -18,40 +18,40 @@ export function TrackList({ onSelect, selectedId }: TrackListProps) {
   }, [tracks]);
 
   if (isLoading) {
-    return <div className="text-zinc-500">Loading tracks from the blockchain...</div>;
+    return <div className="text-sm uppercase tracking-widest text-gray-400">Loading tracks…</div>;
   }
 
   if (error) {
-    return <div className="text-red-500">Failed to load tracks: {error.message}</div>;
+    return <div className="text-sm text-white">Failed to load tracks: {error.message}</div>;
   }
 
   if (tracks.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-zinc-300 p-6 text-center text-zinc-500 dark:border-zinc-700">
-        No tracks registered yet. Register the first track from the artist dashboard.
+      <div className="border border-dashed border-white p-6 text-center text-sm text-gray-400">
+        No tracks yet. Register the first one above.
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {sorted.map((track) => (
         <button
           key={track.id.toString()}
           onClick={() => onSelect(track)}
-          className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition ${
+          className={`flex w-full items-center justify-between border-2 px-4 py-3 text-left transition ${
             selectedId === track.id
-              ? "border-arc-500 bg-arc-50 dark:bg-arc-900/20"
-              : "border-zinc-200 bg-white hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+              ? "border-white bg-white text-black"
+              : "border-white bg-black text-white hover:bg-white hover:text-black"
           }`}
         >
           <div>
-            <p className="font-semibold">{track.title}</p>
-            <p className="text-xs text-zinc-500">Artist: {track.artist}</p>
+            <p className="font-bold uppercase tracking-tight">{track.title}</p>
+            <p className="font-mono text-xs text-current/70">{track.artist}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm font-medium">{formatUnits(track.listenPrice, 18)} USDC</p>
-            <p className="text-xs text-zinc-500">{track.totalListens.toString()} listens</p>
+            <p className="text-sm font-bold">{formatUnits(track.listenPrice, 18)} USDC</p>
+            <p className="font-mono text-xs text-current/70">{track.totalListens.toString()} listens</p>
           </div>
         </button>
       ))}
