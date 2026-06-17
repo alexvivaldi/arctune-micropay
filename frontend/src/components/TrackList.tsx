@@ -18,17 +18,28 @@ export function TrackList({ onSelect, selectedId }: TrackListProps) {
   }, [tracks]);
 
   if (isLoading) {
-    return <div className="text-sm uppercase tracking-widest text-gray-400">Loading tracks…</div>;
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-16 animate-pulse border-2 border-white bg-white/10" />
+        ))}
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-sm text-white">Failed to load tracks: {error.message}</div>;
+    return (
+      <div className="border-2 border-white bg-white p-4 text-sm text-black">
+        <p className="font-bold uppercase tracking-widest">Failed to load tracks</p>
+        <p className="mt-1">{error.message}</p>
+      </div>
+    );
   }
 
   if (tracks.length === 0) {
     return (
-      <div className="border border-dashed border-white p-6 text-center text-sm text-gray-400">
-        No tracks yet. Register the first one above.
+      <div className="border-2 border-dashed border-white p-6 text-center text-sm text-gray-400">
+        No tracks yet. Register the first one above and it will appear here automatically.
       </div>
     );
   }

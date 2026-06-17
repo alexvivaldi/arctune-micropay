@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { MICROTUNE_ABI } from "@/lib/contract";
+import { MICROTUNE_ABI, getExplorerUrl } from "@/lib/contract";
 import { isAddress } from "viem";
 import { useMicroTuneContract } from "@/hooks/useMicroTune";
 
 export function RegisterTrack() {
   const { address } = useAccount();
   const { address: contractAddress } = useMicroTuneContract();
-  const { writeContract, data: hash, error, isPending } = useWriteContract();
+  const { writeContract, data: hash, error, isPending, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const [title, setTitle] = useState("");
@@ -21,6 +21,26 @@ export function RegisterTrack() {
   const [collab, setCollab] = useState("");
 
   const isBusy = isPending || isConfirming;
+
+  const resetForm = useCallback(() => {
+    setTitle("");
+    setMetadataURI("https://arctune.xyz/track/");
+    setArtistShare("70");
+    setProducerShare("20");
+    setCollabShare("10");
+    setProducer("");
+    setCollab("");
+  }, []);
+
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        resetForm();
+        reset();
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, resetForm, reset]);
 
   const register = useCallback(
     (e: React.FormEvent) => {
@@ -59,7 +79,8 @@ export function RegisterTrack() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full border-2 border-white bg-black px-3 py-2 text-sm outline-none transition focus:bg-white focus:text-black"
+            disabled={isBusy}
+            className="w-full border-2 border-white bg-black px-3 py-2 text-sm outline-none transition focus:bg-white focus:text-black disabled:opacity-50"
             placeholder="Midnight Guitar"
           />
         </div>
@@ -69,7 +90,8 @@ export function RegisterTrack() {
             value={metadataURI}
             onChange={(e) => setMetadataURI(e.target.value)}
             required
-            className="w-full border-2 border-white bg-black px-3 py-2 text-sm outline-none transition focus:bg-white focus:text-black"
+            disabled={isBusy}
+            className="w-full border-2 border-white bg-black px-3 py-2 text-sm outline-none transition focus:bg-white focus:text-black disabled:opacity-50"
             placeholder="ipfs://..."
           />
         </div>
@@ -87,7 +109,8 @@ export function RegisterTrack() {
                 onChange={(e) => field.set(e.target.value)}
                 min={0}
                 max={100}
-                className="w-full border-2 border-white bg-black px-3 py-2 text-sm outline-none transition focus:bg-white focus:text-black"
+                disabled={isBusy}
+                className="w-full border-2 border-white bg-black px-3 py-2 text-sm outline-none transition focus:bg-white focus:text-black disabled:opacity-50"
               />
             </div>
           ))}
@@ -97,7 +120,8 @@ export function RegisterTrack() {
           <input
             value={producer}
             onChange={(e) => setProducer(e.target.value)}
-            className="w-full border-2 border-white bg-black px-3 py-2 text-sm font-mono outline-none transition focus:bg-white focus:text-black"
+            disabled={isBusy}
+            className="w-full border-2 border-white bg-black px-3 py-2 text-sm font-mono outline-none transition focus:bg-white focus:text-black disabled:opacity-50"
             placeholder="0x..."
           />
         </div>
@@ -106,7 +130,8 @@ export function RegisterTrack() {
           <input
             value={collab}
             onChange={(e) => setCollab(e.target.value)}
-            className="w-full border-2 border-white bg-black px-3 py-2 text-sm font-mono outline-none transition focus:bg-white focus:text-black"
+            disabled={isBusy}
+            className="w-full border-2 border-white bg-black px-3 py-2 text-sm font-mono outline-none transition focus:bg-white focus:text-black disabled:opacity-50"
             placeholder="0x..."
           />
         </div>
@@ -115,10 +140,32 @@ export function RegisterTrack() {
           disabled={isBusy || !address}
           className="w-full border-2 border-white bg-white px-4 py-3 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-black hover:text-white disabled:opacity-50"
         >
-          {isBusy ? (isConfirming ? "Confirming…" : "Registering…") : "Register track"}
+          {isBusy ? (isConfirming ? "Confirming on-chain…" : "Submitting…") : "Register track"}
         </button>
-        {error && <p className="text-sm text-white">{error.message}</p>}
-        {isSuccess && <p className="text-sm font-bold uppercase text-white">Track registered.</p>}
+
+        {error && (
+          <div className="border-2 border-white bg-white p-3 text-sm text-black">
+            <p className="font-bold uppercase tracking-widest">Error</p>
+            <p className="mt-1 break-words">{error.message}</p>
+          </div>
+        )}
+
+        {isSuccess && hash && (
+          <div className="border-2 border-white bg-white p-4 text-black">
+            <p className="text-sm font-bold uppercase tracking-widest">Track registered</p>
+            <p className="mt-2 text-xs text-black/70">
+              The transaction is confirmed and the track should now appear in the list.
+            </p>
+            <a
+              href={getExplorerUrl(hash)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-block break-all font-mono text-xs underline hover:text-black/70"
+            >
+              {hash}
+            </a>
+          </div>
+        )}
       </form>
     </div>
   );

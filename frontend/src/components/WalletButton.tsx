@@ -11,6 +11,9 @@ export function WalletButton() {
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
   const { data: balance } = useUsdcBalance();
+  const balanceText = balance?.value
+    ? `${formatUnits(balance.value, balance.decimals ?? 18)} ${balance.symbol ?? "USDC"}`
+    : "—";
 
   if (!isConnected || !address) {
     return (
@@ -28,9 +31,7 @@ export function WalletButton() {
       <div className="h-6 w-6 bg-white" />
       <div className="flex flex-col items-start leading-none">
         <span className="font-mono text-sm uppercase">{formatAddress(address)}</span>
-        <span className="font-mono text-xs text-gray-400">
-          {balance !== undefined ? `${formatUnits(balance, 18)} USDC` : "—"}
-        </span>
+        <span className="font-mono text-xs text-gray-400">{balanceText}</span>
       </div>
       <button
         onClick={() => disconnect()}

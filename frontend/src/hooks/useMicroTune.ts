@@ -1,5 +1,6 @@
 import {
   useAccount,
+  useBalance,
   useReadContract,
   useReadContracts,
   useWriteContract,
@@ -34,7 +35,7 @@ export function useTrackCount() {
     address: address ?? undefined,
     abi,
     functionName: "getTrackCount",
-    query: { enabled: configured },
+    query: { enabled: configured, refetchInterval: 5_000 },
   });
 }
 
@@ -45,7 +46,7 @@ export function useTrack(trackId: bigint) {
     abi,
     functionName: "getTrack",
     args: [trackId],
-    query: { enabled: configured },
+    query: { enabled: configured, refetchInterval: 5_000 },
   });
 }
 
@@ -68,6 +69,7 @@ export function useTracks() {
     contracts,
     query: {
       enabled: configured && contracts.length > 0,
+      refetchInterval: 5_000,
     },
   });
 
@@ -112,7 +114,7 @@ export function useUsdcAllowance() {
     abi: ERC20_ABI,
     functionName: "allowance",
     args: account && contract ? [account, contract] : undefined,
-    query: { enabled: Boolean(account && contract) },
+    query: { enabled: Boolean(account && contract), refetchInterval: 5_000 },
   });
 }
 
@@ -141,12 +143,9 @@ export function useApproveUsdc() {
 
 export function useUsdcBalance() {
   const { address: account } = useAccount();
-  return useReadContract({
-    address: ARC_USDC_ADDRESS,
-    abi: ERC20_ABI,
-    functionName: "balanceOf",
-    args: account ? [account] : undefined,
-    query: { enabled: Boolean(account) },
+  return useBalance({
+    address: account,
+    query: { enabled: Boolean(account), refetchInterval: 5_000 },
   });
 }
 

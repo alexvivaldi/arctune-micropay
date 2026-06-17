@@ -10,6 +10,7 @@ import {
 } from "@/hooks/useMicroTune";
 import { Track } from "@/types/track";
 import { formatUnits } from "viem";
+import { getExplorerUrl } from "@/lib/contract";
 
 interface AgentPlayerProps {
   track: Track;
@@ -137,6 +138,25 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
           </button>
         </div>
 
+        <div className="mb-6 flex items-center gap-3 border-2 border-white px-3 py-2">
+          <span className="flex h-2 w-2">
+            <span
+              className={`inline-flex h-2 w-2 rounded-full ${
+                isBusy || auto ? "animate-pulse bg-white" : "bg-gray-500"
+              }`}
+            />
+          </span>
+          <p className="font-mono text-xs uppercase tracking-widest text-gray-400">
+            {isPending || isApprovePending
+              ? "Waiting for wallet signature"
+              : isConfirming || isApproveConfirming
+              ? "Waiting for on-chain confirmation"
+              : auto
+              ? "Agent is running — paying every 8s"
+              : "Agent idle"}
+          </p>
+        </div>
+
         <div className="mb-6 grid grid-cols-2 gap-4 border-2 border-white">
           <div className="border-r-2 border-white p-3">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Agent listens</p>
@@ -145,15 +165,20 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
           <div className="p-3">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Wallet balance</p>
             <p className="font-mono text-xl font-bold">
-              {balance ? `${formatUnits(balance, 18)} USDC` : "—"}
+              {balance?.value ? `${formatUnits(balance.value, balance.decimals ?? 18)} ${balance.symbol ?? "USDC"}` : "—"}
             </p>
           </div>
         </div>
 
         {hash && (
-          <p className="mb-4 font-mono text-xs text-gray-400">
+          <a
+            href={getExplorerUrl(hash)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-4 block font-mono text-xs text-gray-400 hover:text-white"
+          >
             Tx: {hash.slice(0, 14)}…{hash.slice(-12)}
-          </p>
+          </a>
         )}
 
         <div className="h-32 overflow-y-auto border-2 border-white bg-black p-3">

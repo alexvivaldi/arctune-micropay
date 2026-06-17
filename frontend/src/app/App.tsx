@@ -120,9 +120,16 @@ export default function App() {
                   <RoyaltyBot track={selected} />
                 </>
               ) : (
-                <div className="flex h-full min-h-[320px] flex-col items-center justify-center border-2 border-dashed border-white bg-black p-12 text-center">
+                <div className="flex h-full min-h-[320px] flex-col items-center justify-center gap-4 border-2 border-dashed border-white bg-black p-12 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center border-2 border-white">
+                    <Image src="/agent.svg" alt="" width={32} height={32} />
+                  </div>
                   <p className="text-sm uppercase tracking-widest text-gray-400">
-                    Select a track to start the agent player
+                    Select a track from the list to start the agent player
+                  </p>
+                  <p className="max-w-sm text-xs leading-relaxed text-gray-500">
+                    The agent will sign a real transaction and pay 0.05 USDC directly to the artist,
+                    producer and collaborator.
                   </p>
                 </div>
               )}
