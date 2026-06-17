@@ -1,4 +1,5 @@
 import type { Abi } from "viem";
+import { getAddress } from "viem";
 import artifact from "@/abis/MicroTune.json";
 import { ERC20_ABI as erc20Abi } from "@/lib/erc20";
 
@@ -7,7 +8,7 @@ export const MICROTUNE_BYTECODE = (artifact as { bytecode: `0x${string}` }).byte
 export const ERC20_ABI = erc20Abi;
 
 export function getMicroTuneAddress(): `0x${string}` | null {
-  const addr = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+  const addr = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS?.trim();
   if (!addr) return null;
   return addr as `0x${string}`;
 }
@@ -16,8 +17,13 @@ export function isMicroTuneConfigured(): boolean {
   return Boolean(getMicroTuneAddress());
 }
 
-export const ARC_USDC_ADDRESS: `0x${string}` =
-  (process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}`) ||
-  "0x3600000000000000000000000000000000000000";
+function normalizeAddress(addr: string | undefined): `0x${string}` {
+  const raw = (addr ?? "0x3600000000000000000000000000000000000000").trim();
+  return getAddress(raw);
+}
+
+export const ARC_USDC_ADDRESS: `0x${string}` = normalizeAddress(
+  process.env.NEXT_PUBLIC_USDC_ADDRESS
+);
 
 export const DEFAULT_PRICE = "50000000000000000"; // 0.05 USDC, 18 decimals
