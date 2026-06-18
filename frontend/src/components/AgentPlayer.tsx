@@ -222,15 +222,30 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
           </div>
         </div>
 
-        {hash && (
-          <a
-            href={getExplorerUrl(hash)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mb-4 block font-mono text-xs text-gray-400 hover:text-white"
-          >
-            Tx: {hash.slice(0, 14)}…{hash.slice(-12)}
-          </a>
+        {(hash || approveHash) && (
+          <div className="mb-4 border-2 border-white bg-black p-3">
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-gray-400">
+              {hash
+                ? isSuccess
+                  ? "Listen confirmed"
+                  : isConfirming
+                  ? "Listen confirming"
+                  : "Listen submitted"
+                : isApproveSuccess
+                ? "Approve confirmed"
+                : isApproveConfirming
+                ? "Approve confirming"
+                : "Approve submitted"}
+            </p>
+            <a
+              href={getExplorerUrl((hash || approveHash) as `0x${string}`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block break-all font-mono text-xs text-white underline hover:text-white/70"
+            >
+              {(hash || approveHash)?.slice(0, 18)}…{(hash || approveHash)?.slice(-12)}
+            </a>
+          </div>
         )}
 
         <div className="h-32 overflow-y-auto border-2 border-white bg-black p-3">

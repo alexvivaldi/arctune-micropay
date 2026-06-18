@@ -194,14 +194,22 @@ export function RegisterTrack() {
           {isBusy ? (isConfirming ? "Confirming on-chain…" : "Submitting…") : "Register track"}
         </button>
 
-        {isSuccess && hash && (
-          <div className="border-2 border-white bg-white p-4 text-black">
-            <p className="text-sm font-bold uppercase tracking-widest">Track registered</p>
+        {isPending && !hash && (
+          <p className="text-center text-xs uppercase tracking-widest text-gray-400">
+            Confirm the transaction in your wallet
+          </p>
+        )}
+
+        {hash && (
+          <div className={`border-2 p-4 ${isSuccess ? "border-white bg-white text-black" : "border-white bg-black text-white"}`}>
+            <p className="text-sm font-bold uppercase tracking-widest">
+              {isSuccess ? "Track registered" : isConfirming ? "Confirming on-chain" : "Transaction submitted"}
+            </p>
             <a
               href={getExplorerUrl(hash)}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-block break-all font-mono text-xs underline hover:text-black/70"
+              className={`mt-3 inline-block break-all font-mono text-xs underline ${isSuccess ? "hover:text-black/70" : "hover:text-white/70"}`}
             >
               {hash}
             </a>
