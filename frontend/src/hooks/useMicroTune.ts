@@ -1,6 +1,5 @@
 import {
   useAccount,
-  useBalance,
   useReadContract,
   useReadContracts,
   useWriteContract,
@@ -143,8 +142,11 @@ export function useApproveUsdc() {
 
 export function useUsdcBalance() {
   const { address: account } = useAccount();
-  return useBalance({
-    address: account,
+  return useReadContract({
+    address: ARC_USDC_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: account ? [account] : undefined,
     query: { enabled: Boolean(account), refetchInterval: 5_000 },
   });
 }

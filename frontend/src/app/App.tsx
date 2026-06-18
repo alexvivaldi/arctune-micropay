@@ -8,6 +8,7 @@ import { TrackList } from "@/components/TrackList";
 import { AgentPlayer } from "@/components/AgentPlayer";
 import { RoyaltyBot } from "@/components/RoyaltyBot";
 import { RegisterTrack } from "@/components/RegisterTrack";
+import { SetDefaultPrice } from "@/components/SetDefaultPrice";
 import { Track } from "@/types/track";
 import { useMicroTuneConfigured } from "@/hooks/useMicroTune";
 import { DeployContract } from "@/components/DeployContract";
@@ -102,6 +103,7 @@ export default function App() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-12">
             <aside className="space-y-6 lg:col-span-4">
+              <SetDefaultPrice />
               <RegisterTrack />
               <div className="border-2 border-white bg-black">
                 <div className="border-b-2 border-white px-4 py-3">

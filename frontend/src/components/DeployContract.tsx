@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { formatUnits, parseUnits } from "viem";
+import { formatUnits } from "viem";
 import Image from "next/image";
 import { useDeployMicroTune } from "@/hooks/useMicroTune";
 import { WalletButton } from "@/components/WalletButton";
-import { ARC_USDC_ADDRESS, getExplorerUrl } from "@/lib/contract";
+import { ARC_USDC_ADDRESS, getExplorerUrl, USDC_DECIMALS, DEFAULT_PRICE } from "@/lib/contract";
 import { useTransactionToast } from "@/hooks/useTransactionToast";
 
 export function DeployContract() {
@@ -22,7 +22,7 @@ export function DeployContract() {
   } = useDeployMicroTune();
   const [copied, setCopied] = useState(false);
 
-  const defaultPrice = parseUnits("0.05", 18);
+  const defaultPrice = BigInt(DEFAULT_PRICE);
 
   useTransactionToast({
     hash,
@@ -72,7 +72,7 @@ export function DeployContract() {
           <div className="mb-6 space-y-1 text-left font-mono text-xs text-gray-400">
             <p>Deployer: {address}</p>
             <p>USDC: {ARC_USDC_ADDRESS}</p>
-            <p>Price: {formatUnits(defaultPrice, 18)} USDC</p>
+            <p>Price: {formatUnits(defaultPrice, USDC_DECIMALS)} USDC</p>
           </div>
 
           <button

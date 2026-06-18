@@ -12,7 +12,7 @@ import {
 import { useTransactionToast } from "@/hooks/useTransactionToast";
 import { Track } from "@/types/track";
 import { formatUnits } from "viem";
-import { getExplorerUrl } from "@/lib/contract";
+import { getExplorerUrl, USDC_DECIMALS } from "@/lib/contract";
 
 interface AgentPlayerProps {
   track: Track;
@@ -41,7 +41,7 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
     pendingTitle: "Listen submitted",
     successTitle: "Listen confirmed",
     errorTitle: "Listen failed",
-    description: `0.05 USDC for #${currentTrack.id}.`,
+    description: `${formatUnits(currentTrack.listenPrice, USDC_DECIMALS)} USDC for #${currentTrack.id}.`,
   });
 
   useTransactionToast({
@@ -63,6 +63,7 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
 
   const price = currentTrack.listenPrice;
   const needsApproval = !allowance || allowance < price;
+  const insufficientBalance = balance !== undefined && balance < price;
 
   useEffect(() => {
     if (isSuccess && hash) {
@@ -108,7 +109,7 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
 
   const payForListen = useCallback(() => {
     setLog((prev) => [
-      `Agent: paid ${formatUnits(price, 18)} USDC for #${currentTrack.id}`,
+      `Agent: paid ${formatUnits(price, USDC_DECIMALS)} USDC for #${currentTrack.id}`,
       ...prev,
     ].slice(0, 20));
     listen(currentTrack.id);
@@ -150,7 +151,7 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
           <div>
             <p className="text-lg font-bold uppercase tracking-tight">{currentTrack.title}</p>
             <p className="font-mono text-xs text-gray-400">
-              {formatUnits(currentTrack.totalRevenue, 18)} USDC · {currentTrack.totalListens.toString()} listens
+              {formatUnits(currentTrack.totalRevenue, USDC_DECIMALS)} USDC · {currentTrack.totalListens.toString()} listens
             </p>
           </div>
         </div>
@@ -159,7 +160,7 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
           {needsApproval ? (
             <button
               onClick={() => approve(price)}
-              disabled={isBusy || isAllowanceLoading}
+              disabled={isBusy || isAllowanceLoading || insufficientBalance}
               className="border-2 border-white bg-white px-6 py-3 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-black hover:text-white disabled:opacity-50"
             >
               {isApprovePending || isApproveConfirming ? "Approving…" : "Approve USDC"}
@@ -170,7 +171,7 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
                 playTone();
                 payForListen();
               }}
-              disabled={isBusy}
+              disabled={isBusy || insufficientBalance}
               className="border-2 border-white bg-white px-6 py-3 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-black hover:text-white disabled:opacity-50"
             >
               {isPending || isConfirming ? "Paying…" : "Listen now — 0.05 USDC"}
@@ -189,6 +190,25 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
             {auto ? "Stop agent" : "Run agent"}
           </button>
         </div>
+
+        {insufficientBalance && (
+          <div className="mb-4 border-2 border-white bg-white p-3 text-sm text-black">
+            <p className="font-bold uppercase tracking-widest">Insufficient USDC</p>
+            <p className="mt-1">
+              Your wallet has {balance ? formatUnits(balance, USDC_DECIMALS) : "0"} USDC, but this
+              track costs {formatUnits(price, USDC_DECIMALS)} USDC. Get test USDC from{" "}
+              <a
+                href="https://faucet.circle.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Circle Faucet
+              </a>
+              .
+            </p>
+          </div>
+        )}
 
         <div className="mb-6 flex items-center gap-3 border-2 border-white px-3 py-2">
           <span className="flex h-2 w-2">
@@ -217,7 +237,7 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
           <div className="p-3">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Wallet balance</p>
             <p className="font-mono text-xl font-bold">
-              {balance?.value ? `${formatUnits(balance.value, balance.decimals ?? 18)} ${balance.symbol ?? "USDC"}` : "—"}
+              {balance ? `${formatUnits(balance, USDC_DECIMALS)} USDC` : "—"}
             </p>
           </div>
         </div>

@@ -7,7 +7,8 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MicroTune is ReentrancyGuard, Ownable {
     uint256 public constant TOTAL_BPS = 10_000;
-    uint256 public constant DEFAULT_PRICE = 0.05 ether;
+    // USDC on Arc uses 6 decimals. 0.05 USDC = 50_000 units.
+    uint256 public constant DEFAULT_PRICE = 50_000;
 
     IERC20 public immutable usdc;
     uint256 public defaultPrice;

@@ -5,14 +5,15 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { formatAddress } from "@/lib/format";
 import { useUsdcBalance } from "@/hooks/useMicroTune";
 import { formatUnits } from "viem";
+import { USDC_DECIMALS } from "@/lib/contract";
 
 export function WalletButton() {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
   const { data: balance } = useUsdcBalance();
-  const balanceText = balance?.value
-    ? `${formatUnits(balance.value, balance.decimals ?? 18)} ${balance.symbol ?? "USDC"}`
+  const balanceText = balance
+    ? `${formatUnits(balance, USDC_DECIMALS)} USDC`
     : "—";
 
   if (!isConnected || !address) {

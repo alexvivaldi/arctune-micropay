@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useWatchContractEvent, useReadContract } from "wagmi";
 import Image from "next/image";
-import { MICROTUNE_ABI, getMicroTuneAddress, getExplorerUrl } from "@/lib/contract";
+import { MICROTUNE_ABI, getMicroTuneAddress, getExplorerUrl, USDC_DECIMALS } from "@/lib/contract";
 import { Track } from "@/types/track";
 import { formatUnits } from "viem";
 
@@ -97,7 +97,7 @@ export function RoyaltyBot({ track }: RoyaltyBotProps) {
                 <p className="font-mono text-xs">{entry.beneficiary}</p>
               </div>
               <div className="text-right">
-                <p className="font-bold">{formatUnits(entry.amount, 18)} USDC</p>
+                <p className="font-bold">{formatUnits(entry.amount, USDC_DECIMALS)} USDC</p>
                 <p className="font-mono text-xs text-gray-400">{Number(track.shares[i] / 100n)}%</p>
               </div>
             </div>
@@ -122,7 +122,7 @@ export function RoyaltyBot({ track }: RoyaltyBotProps) {
                     </a>
                   )}
                 </div>
-                <p className="font-mono text-xs font-bold">{formatUnits(split.amount, 18)} USDC</p>
+                <p className="font-mono text-xs font-bold">{formatUnits(split.amount, USDC_DECIMALS)} USDC</p>
               </div>
             ))}
           </div>

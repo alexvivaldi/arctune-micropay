@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useTracks } from "@/hooks/useMicroTune";
 import { Track } from "@/types/track";
 import { formatUnits } from "viem";
+import { USDC_DECIMALS } from "@/lib/contract";
 
 interface TrackListProps {
   onSelect: (track: Track) => void;
@@ -61,7 +62,7 @@ export function TrackList({ onSelect, selectedId }: TrackListProps) {
             <p className="font-mono text-xs text-current/70">{track.artist}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm font-bold">{formatUnits(track.listenPrice, 18)} USDC</p>
+            <p className="text-sm font-bold">{formatUnits(track.listenPrice, USDC_DECIMALS)} USDC</p>
             <p className="font-mono text-xs text-current/70">{track.totalListens.toString()} listens</p>
           </div>
         </button>

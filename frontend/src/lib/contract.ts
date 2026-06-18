@@ -26,8 +26,17 @@ export const ARC_USDC_ADDRESS: `0x${string}` = normalizeAddress(
   process.env.NEXT_PUBLIC_USDC_ADDRESS
 );
 
-export const DEFAULT_PRICE = "50000000000000000"; // 0.05 USDC, 18 decimals
+export const USDC_DECIMALS = 6;
+
+// USDC on Arc uses 6 decimals: 0.05 USDC = 50_000 units.
+export const DEFAULT_PRICE = "50000";
 
 export function getExplorerUrl(hash: `0x${string}`): string {
   return `https://testnet.arcscan.app/tx/${hash}`;
+}
+
+export function parseUsdc(value: string): bigint {
+  const [whole = "0", frac = ""] = value.split(".");
+  const padded = (frac + "000000").slice(0, USDC_DECIMALS);
+  return BigInt(whole) * 10n ** BigInt(USDC_DECIMALS) + BigInt(padded);
 }
