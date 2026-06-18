@@ -18,6 +18,7 @@ html {
   background: var(--background);
   color: var(--foreground);
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 body {
@@ -25,6 +26,9 @@ body {
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 ::selection {
@@ -51,4 +55,20 @@ button {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* RainbowKit connect modal: always centered, never a bottom sheet */
+[data-rk] [role="dialog"] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+[data-rk] [role="dialog"] > div {
+  border-radius: 0 !important;
 }
