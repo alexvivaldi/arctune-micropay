@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { getExplorerUrl } from "@/lib/contract";
 
 export interface ToastItem {
@@ -69,6 +70,11 @@ function Toast({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) =
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toast = useCallback((item: Omit<ToastItem, "id">) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -79,14 +85,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  const container = mounted ? (
+    <div className="fixed bottom-4 right-4 z-[2147483647] flex flex-col gap-3">
+      {toasts.map((item) => (
+        <Toast key={item.id} item={item} onDismiss={dismiss} />
+      ))}
+    </div>
+  ) : null;
+
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[2147483647] flex flex-col gap-3">
-        {toasts.map((item) => (
-          <Toast key={item.id} item={item} onDismiss={dismiss} />
-        ))}
-      </div>
+      {mounted ? createPortal(container, document.body) : container}
     </ToastContext.Provider>
   );
 }
