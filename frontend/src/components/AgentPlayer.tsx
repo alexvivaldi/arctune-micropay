@@ -9,7 +9,7 @@ import {
   useUsdcAllowance,
   useUsdcBalance,
 } from "@/hooks/useMicroTune";
-import { useToast } from "@/hooks/useToast";
+import { useTransactionToast } from "@/hooks/useTransactionToast";
 import { Track } from "@/types/track";
 import { formatUnits } from "viem";
 import { getExplorerUrl } from "@/lib/contract";
@@ -19,7 +19,6 @@ interface AgentPlayerProps {
 }
 
 export function AgentPlayer({ track }: AgentPlayerProps) {
-  const { toast } = useToast();
   const { listen, isPending, isConfirming, isSuccess, hash, error, reset } = useListen();
   const { data: allowance, isLoading: isAllowanceLoading } = useUsdcAllowance();
   const {
@@ -35,6 +34,26 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
   const { data: liveTrack } = useTrack(track.id);
   const currentTrack = (liveTrack as Track | undefined) ?? track;
 
+  useTransactionToast({
+    hash,
+    error,
+    isSuccess,
+    pendingTitle: "Listen submitted",
+    successTitle: "Listen confirmed",
+    errorTitle: "Listen failed",
+    description: `0.05 USDC for #${currentTrack.id}.`,
+  });
+
+  useTransactionToast({
+    hash: approveHash,
+    error: approveError,
+    isSuccess: isApproveSuccess,
+    pendingTitle: "Approve submitted",
+    successTitle: "USDC approved",
+    errorTitle: "Approve failed",
+    description: "Allowance for MicroTune contract.",
+  });
+
   const [auto, setAuto] = useState(false);
   const [agentCount, setAgentCount] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -47,41 +66,24 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
 
   useEffect(() => {
     if (isSuccess && hash) {
-      toast({
-        title: "Listen paid",
-        description: `0.05 USDC sent for #${currentTrack.id} — track data updated.`,
-        txHash: hash,
-      });
       setLog((prev) => [`Tx confirmed: ${hash.slice(0, 14)}…${hash.slice(-12)}`, ...prev].slice(0, 20));
       const t = setTimeout(() => reset(), 5000);
       return () => clearTimeout(t);
     }
-  }, [isSuccess, hash, reset, toast, currentTrack.id]);
-
-  useEffect(() => {
-    if (isApproveSuccess && approveHash) {
-      toast({
-        title: "USDC approved",
-        description: "Allowance set. You can now start listening.",
-        txHash: approveHash,
-      });
-      const t = setTimeout(() => resetApprove(), 5000);
-      return () => clearTimeout(t);
-    }
-  }, [isApproveSuccess, approveHash, resetApprove, toast]);
+  }, [isSuccess, hash, reset]);
 
   useEffect(() => {
     if (error) {
-      toast({ title: "Listen failed", description: error.message, variant: "error" });
       setLog((prev) => [`Error: ${error.message}`, ...prev].slice(0, 20));
     }
-  }, [error, toast]);
+  }, [error]);
 
   useEffect(() => {
-    if (approveError) {
-      toast({ title: "Approve failed", description: approveError.message, variant: "error" });
+    if (isApproveSuccess && approveHash) {
+      const t = setTimeout(() => resetApprove(), 5000);
+      return () => clearTimeout(t);
     }
-  }, [approveError, toast]);
+  }, [isApproveSuccess, approveHash, resetApprove]);
 
   const playTone = useCallback(() => {
     if (typeof window === "undefined") return;

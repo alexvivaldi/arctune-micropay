@@ -7,11 +7,10 @@ import Image from "next/image";
 import { useDeployMicroTune } from "@/hooks/useMicroTune";
 import { WalletButton } from "@/components/WalletButton";
 import { ARC_USDC_ADDRESS, getExplorerUrl } from "@/lib/contract";
-import { useToast } from "@/hooks/useToast";
+import { useTransactionToast } from "@/hooks/useTransactionToast";
 
 export function DeployContract() {
   const { isConnected, address } = useAccount();
-  const { toast } = useToast();
   const {
     deploy,
     hash,
@@ -25,21 +24,15 @@ export function DeployContract() {
 
   const defaultPrice = parseUnits("0.05", 18);
 
-  useEffect(() => {
-    if (isSuccess && hash && contractAddress) {
-      toast({
-        title: "Contract deployed",
-        description: `MicroTune is live at ${contractAddress.slice(0, 8)}…`,
-        txHash: hash,
-      });
-    }
-  }, [isSuccess, hash, contractAddress, toast]);
-
-  useEffect(() => {
-    if (error) {
-      toast({ title: "Deploy failed", description: error.message, variant: "error" });
-    }
-  }, [error, toast]);
+  useTransactionToast({
+    hash,
+    error,
+    isSuccess,
+    pendingTitle: "Contract deploy submitted",
+    successTitle: "Contract deployed",
+    errorTitle: "Deploy failed",
+    description: contractAddress ? `MicroTune at ${contractAddress.slice(0, 8)}…` : undefined,
+  });
 
   useEffect(() => {
     if (contractAddress) setCopied(false);

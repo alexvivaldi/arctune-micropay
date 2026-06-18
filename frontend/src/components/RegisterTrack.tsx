@@ -5,14 +5,23 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagm
 import { MICROTUNE_ABI, getExplorerUrl } from "@/lib/contract";
 import { isAddress } from "viem";
 import { useMicroTuneContract } from "@/hooks/useMicroTune";
-import { useToast } from "@/hooks/useToast";
+import { useTransactionToast } from "@/hooks/useTransactionToast";
 
 export function RegisterTrack() {
   const { address } = useAccount();
   const { address: contractAddress } = useMicroTuneContract();
-  const { toast } = useToast();
   const { writeContract, data: hash, error, isPending, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+
+  useTransactionToast({
+    hash,
+    error,
+    isSuccess,
+    pendingTitle: "Track registration submitted",
+    successTitle: "Track registered",
+    errorTitle: "Registration failed",
+    description: "Your track will appear in the list once confirmed.",
+  });
 
   const [title, setTitle] = useState("");
   const [metadataURI, setMetadataURI] = useState("https://arctune.xyz/track/");
@@ -38,28 +47,13 @@ export function RegisterTrack() {
 
   useEffect(() => {
     if (isSuccess && hash) {
-      toast({
-        title: "Track registered",
-        description: "Your track is now on-chain and visible in the list.",
-        txHash: hash,
-      });
       const timer = setTimeout(() => {
         resetForm();
         reset();
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [isSuccess, hash, resetForm, reset, toast]);
-
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Registration failed",
-        description: error.message,
-        variant: "error",
-      });
-    }
-  }, [error, toast]);
+  }, [isSuccess, hash, resetForm, reset]);
 
   const register = useCallback(
     (e: React.FormEvent) => {
