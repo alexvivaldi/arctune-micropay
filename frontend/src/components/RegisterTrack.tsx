@@ -5,10 +5,12 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagm
 import { MICROTUNE_ABI, getExplorerUrl } from "@/lib/contract";
 import { isAddress } from "viem";
 import { useMicroTuneContract } from "@/hooks/useMicroTune";
+import { useToast } from "@/hooks/useToast";
 
 export function RegisterTrack() {
   const { address } = useAccount();
   const { address: contractAddress } = useMicroTuneContract();
+  const { toast } = useToast();
   const { writeContract, data: hash, error, isPending, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
@@ -19,6 +21,7 @@ export function RegisterTrack() {
   const [collabShare, setCollabShare] = useState("10");
   const [producer, setProducer] = useState("");
   const [collab, setCollab] = useState("");
+  const [validation, setValidation] = useState<string | null>(null);
 
   const isBusy = isPending || isConfirming;
 
@@ -30,38 +33,84 @@ export function RegisterTrack() {
     setCollabShare("10");
     setProducer("");
     setCollab("");
+    setValidation(null);
   }, []);
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && hash) {
+      toast({
+        title: "Track registered",
+        description: "Your track is now on-chain and visible in the list.",
+        txHash: hash,
+      });
       const timer = setTimeout(() => {
         resetForm();
         reset();
-      }, 6000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [isSuccess, resetForm, reset]);
+  }, [isSuccess, hash, resetForm, reset, toast]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "error",
+      });
+    }
+  }, [error, toast]);
 
   const register = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
+      setValidation(null);
       if (!address || !contractAddress) return;
-      const shares = [Number(artistShare), Number(producerShare), Number(collabShare)];
-      const total = shares.reduce((a, b) => a + b, 0);
-      if (total !== 100) {
-        alert("Shares must add up to 100%");
+
+      const artistPct = Number(artistShare);
+      const producerPct = Number(producerShare);
+      const collabPct = Number(collabShare);
+
+      const producerAddr = producer.trim();
+      const collabAddr = collab.trim();
+      const hasProducer = producerAddr !== "" && isAddress(producerAddr);
+      const hasCollab = collabAddr !== "" && isAddress(collabAddr);
+
+      const effectiveProducer = hasProducer ? producerPct : 0;
+      const effectiveCollab = hasCollab ? collabPct : 0;
+
+      if (artistPct <= 0 || artistPct > 100) {
+        setValidation("Artist share must be between 1 and 100%");
         return;
       }
-      const beneficiaries = [address];
-      if (producer && isAddress(producer)) beneficiaries.push(producer);
-      if (collab && isAddress(collab)) beneficiaries.push(collab);
-      const finalShares = beneficiaries.map((_, i) => shares[i] * 100);
+      if (producerPct < 0 || producerPct > 100 || collabPct < 0 || collabPct > 100) {
+        setValidation("Each share must be between 0 and 100%");
+        return;
+      }
+      if (artistPct + effectiveProducer + effectiveCollab !== 100) {
+        setValidation(
+          `Shares must add up to 100% (currently ${artistPct + effectiveProducer + effectiveCollab}%)`
+        );
+        return;
+      }
+
+      const beneficiaries: `0x${string}`[] = [address];
+      const finalShares: number[] = [artistPct * 100];
+
+      if (hasProducer) {
+        beneficiaries.push(producerAddr as `0x${string}`);
+        finalShares.push(producerPct * 100);
+      }
+      if (hasCollab) {
+        beneficiaries.push(collabAddr as `0x${string}`);
+        finalShares.push(collabPct * 100);
+      }
 
       writeContract({
         address: contractAddress,
         abi: MICROTUNE_ABI,
         functionName: "registerTrack",
-        args: [title, metadataURI, 0n, beneficiaries, finalShares],
+        args: [title, metadataURI, 0n, beneficiaries, finalShares.map((s) => BigInt(s))],
       });
     },
     [address, artistShare, collab, collabShare, contractAddress, metadataURI, producer, producerShare, title, writeContract]
@@ -135,6 +184,14 @@ export function RegisterTrack() {
             placeholder="0x..."
           />
         </div>
+
+        {validation && (
+          <div className="border-2 border-white bg-white p-3 text-sm text-black">
+            <p className="font-bold uppercase tracking-widest">Check shares</p>
+            <p className="mt-1">{validation}</p>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={isBusy || !address}
@@ -143,19 +200,9 @@ export function RegisterTrack() {
           {isBusy ? (isConfirming ? "Confirming on-chain…" : "Submitting…") : "Register track"}
         </button>
 
-        {error && (
-          <div className="border-2 border-white bg-white p-3 text-sm text-black">
-            <p className="font-bold uppercase tracking-widest">Error</p>
-            <p className="mt-1 break-words">{error.message}</p>
-          </div>
-        )}
-
         {isSuccess && hash && (
           <div className="border-2 border-white bg-white p-4 text-black">
             <p className="text-sm font-bold uppercase tracking-widest">Track registered</p>
-            <p className="mt-2 text-xs text-black/70">
-              The transaction is confirmed and the track should now appear in the list.
-            </p>
             <a
               href={getExplorerUrl(hash)}
               target="_blank"

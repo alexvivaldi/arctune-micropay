@@ -6,10 +6,12 @@ import { formatUnits, parseUnits } from "viem";
 import Image from "next/image";
 import { useDeployMicroTune } from "@/hooks/useMicroTune";
 import { WalletButton } from "@/components/WalletButton";
-import { ARC_USDC_ADDRESS } from "@/lib/contract";
+import { ARC_USDC_ADDRESS, getExplorerUrl } from "@/lib/contract";
+import { useToast } from "@/hooks/useToast";
 
 export function DeployContract() {
   const { isConnected, address } = useAccount();
+  const { toast } = useToast();
   const {
     deploy,
     hash,
@@ -22,6 +24,22 @@ export function DeployContract() {
   const [copied, setCopied] = useState(false);
 
   const defaultPrice = parseUnits("0.05", 18);
+
+  useEffect(() => {
+    if (isSuccess && hash && contractAddress) {
+      toast({
+        title: "Contract deployed",
+        description: `MicroTune is live at ${contractAddress.slice(0, 8)}…`,
+        txHash: hash,
+      });
+    }
+  }, [isSuccess, hash, contractAddress, toast]);
+
+  useEffect(() => {
+    if (error) {
+      toast({ title: "Deploy failed", description: error.message, variant: "error" });
+    }
+  }, [error, toast]);
 
   useEffect(() => {
     if (contractAddress) setCopied(false);
@@ -82,7 +100,7 @@ export function DeployContract() {
             <div className="mt-6 space-y-2 text-left">
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Transaction hash</p>
               <a
-                href={`https://testnet.arcscan.app/tx/${hash}`}
+                href={getExplorerUrl(hash)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block break-all font-mono text-xs text-white underline"

@@ -17,10 +17,10 @@ export function ClientProviders({ children }: { children: ReactNode }) {
 
   if (!Providers) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 text-zinc-900">
+      <div className="flex min-h-screen items-center justify-center bg-black text-white">
         <div className="text-center">
-          <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-arc-300 border-t-arc-600" />
-          <p className="text-sm text-zinc-500">Loading ArcTune...</p>
+          <div className="mb-4 inline-block h-8 w-8 animate-spin border-4 border-white border-t-transparent" />
+          <p className="text-sm uppercase tracking-widest text-gray-400">Loading ArcTune</p>
         </div>
       </div>
     );

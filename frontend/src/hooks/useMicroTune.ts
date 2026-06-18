@@ -120,7 +120,7 @@ export function useUsdcAllowance() {
 
 export function useApproveUsdc() {
   const { address: contract } = useMicroTuneContract();
-  const { writeContract, data: hash, isPending } = useWriteContract();
+  const { writeContract, data: hash, error, isPending, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -138,7 +138,7 @@ export function useApproveUsdc() {
     [contract, writeContract]
   );
 
-  return { approve, hash, isPending, isConfirming, isSuccess };
+  return { approve, hash, error, isPending, isConfirming, isSuccess, reset };
 }
 
 export function useUsdcBalance() {

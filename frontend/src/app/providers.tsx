@@ -3,6 +3,7 @@ import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { defineChain, http } from "viem";
 import { ReactNode } from "react";
+import { ToastProvider } from "@/components/ToastProvider";
 
 export const arcTestnet = defineChain({
   id: 5042002,
@@ -53,7 +54,7 @@ export function Providers({ children }: { children: ReactNode }) {
             overlayBlur: "small",
           })}
         >
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

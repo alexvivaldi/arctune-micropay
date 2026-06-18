@@ -9,6 +9,7 @@ import {
   useUsdcAllowance,
   useUsdcBalance,
 } from "@/hooks/useMicroTune";
+import { useToast } from "@/hooks/useToast";
 import { Track } from "@/types/track";
 import { formatUnits } from "viem";
 import { getExplorerUrl } from "@/lib/contract";
@@ -18,10 +19,18 @@ interface AgentPlayerProps {
 }
 
 export function AgentPlayer({ track }: AgentPlayerProps) {
+  const { toast } = useToast();
   const { listen, isPending, isConfirming, isSuccess, hash, error, reset } = useListen();
   const { data: allowance, isLoading: isAllowanceLoading } = useUsdcAllowance();
-  const { approve, isPending: isApprovePending, isConfirming: isApproveConfirming } =
-    useApproveUsdc();
+  const {
+    approve,
+    isPending: isApprovePending,
+    isConfirming: isApproveConfirming,
+    isSuccess: isApproveSuccess,
+    hash: approveHash,
+    error: approveError,
+    reset: resetApprove,
+  } = useApproveUsdc();
   const { data: balance } = useUsdcBalance();
   const { data: liveTrack } = useTrack(track.id);
   const currentTrack = (liveTrack as Track | undefined) ?? track;
@@ -38,17 +47,41 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
 
   useEffect(() => {
     if (isSuccess && hash) {
+      toast({
+        title: "Listen paid",
+        description: `0.05 USDC sent for #${currentTrack.id} — track data updated.`,
+        txHash: hash,
+      });
       setLog((prev) => [`Tx confirmed: ${hash.slice(0, 14)}…${hash.slice(-12)}`, ...prev].slice(0, 20));
       const t = setTimeout(() => reset(), 5000);
       return () => clearTimeout(t);
     }
-  }, [isSuccess, hash, reset]);
+  }, [isSuccess, hash, reset, toast, currentTrack.id]);
+
+  useEffect(() => {
+    if (isApproveSuccess && approveHash) {
+      toast({
+        title: "USDC approved",
+        description: "Allowance set. You can now start listening.",
+        txHash: approveHash,
+      });
+      const t = setTimeout(() => resetApprove(), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [isApproveSuccess, approveHash, resetApprove, toast]);
 
   useEffect(() => {
     if (error) {
+      toast({ title: "Listen failed", description: error.message, variant: "error" });
       setLog((prev) => [`Error: ${error.message}`, ...prev].slice(0, 20));
     }
-  }, [error]);
+  }, [error, toast]);
+
+  useEffect(() => {
+    if (approveError) {
+      toast({ title: "Approve failed", description: approveError.message, variant: "error" });
+    }
+  }, [approveError, toast]);
 
   const playTone = useCallback(() => {
     if (typeof window === "undefined") return;
