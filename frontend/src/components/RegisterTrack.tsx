@@ -67,8 +67,19 @@ export function RegisterTrack() {
 
       const producerAddr = producer.trim();
       const collabAddr = collab.trim();
-      const hasProducer = producerAddr !== "" && isAddress(producerAddr);
-      const hasCollab = collabAddr !== "" && isAddress(collabAddr);
+      const producerFilled = producerAddr !== "";
+      const collabFilled = collabAddr !== "";
+      const hasProducer = producerFilled && isAddress(producerAddr);
+      const hasCollab = collabFilled && isAddress(collabAddr);
+
+      if (producerFilled && !hasProducer) {
+        setValidation("Producer address must be a valid 0x... address (ENS is not supported yet)");
+        return;
+      }
+      if (collabFilled && !hasCollab) {
+        setValidation("Collaborator address must be a valid 0x... address (ENS is not supported yet)");
+        return;
+      }
 
       const effectiveProducer = hasProducer ? producerPct : 0;
       const effectiveCollab = hasCollab ? collabPct : 0;
