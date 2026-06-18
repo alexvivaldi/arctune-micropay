@@ -56,19 +56,3 @@ a {
   color: inherit;
   text-decoration: none;
 }
-
-/* RainbowKit connect modal: always centered, never a bottom sheet */
-[data-rk] [role="dialog"] {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  right: auto !important;
-  bottom: auto !important;
-  transform: translate(-50%, -50%) !important;
-  max-height: 90vh;
-  overflow: auto;
-}
-
-[data-rk] [role="dialog"] > div {
-  border-radius: 0 !important;
-}
