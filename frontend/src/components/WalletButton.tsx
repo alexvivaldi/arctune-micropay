@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount, useDisconnect, useConnect } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { formatAddress } from "@/lib/format";
 import { useUsdcBalance } from "@/hooks/useMicroTune";
@@ -11,15 +11,25 @@ export function WalletButton() {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
+  const { connect, connectors } = useConnect();
   const { data: balance } = useUsdcBalance();
   const balanceText = balance
     ? `${formatUnits(balance, USDC_DECIMALS)} USDC`
     : "—";
 
+  const handleConnect = () => {
+    const injected = connectors.find((c) => c.id === "injected");
+    if (injected) {
+      connect({ connector: injected });
+    } else if (openConnectModal) {
+      openConnectModal();
+    }
+  };
+
   if (!isConnected || !address) {
     return (
       <button
-        onClick={openConnectModal}
+        onClick={handleConnect}
         className="border-2 border-white bg-white px-6 py-3 text-sm font-bold uppercase tracking-widest text-black transition hover:bg-black hover:text-white"
       >
         Connect
