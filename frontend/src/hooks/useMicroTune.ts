@@ -85,7 +85,7 @@ export function useTracks() {
 
 export function useListen() {
   const { address, abi, configured } = useMicroTuneContract();
-  const { writeContract, data: hash, error, isPending } = useWriteContract();
+  const { writeContract, data: hash, error, isPending, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -103,7 +103,7 @@ export function useListen() {
     [address, abi, configured, writeContract]
   );
 
-  return { listen, hash, error, isPending, isConfirming, isSuccess };
+  return { listen, hash, error, isPending, isConfirming, isSuccess, reset };
 }
 
 export function useUsdcAllowance() {

@@ -17,7 +17,7 @@ interface AgentPlayerProps {
 }
 
 export function AgentPlayer({ track }: AgentPlayerProps) {
-  const { listen, isPending, isConfirming, hash } = useListen();
+  const { listen, isPending, isConfirming, isSuccess, hash, error, reset } = useListen();
   const { data: allowance, isLoading: isAllowanceLoading } = useUsdcAllowance();
   const { approve, isPending: isApprovePending, isConfirming: isApproveConfirming } =
     useApproveUsdc();
@@ -32,6 +32,20 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
 
   const price = track.listenPrice;
   const needsApproval = !allowance || allowance < price;
+
+  useEffect(() => {
+    if (isSuccess && hash) {
+      setLog((prev) => [`Tx confirmed: ${hash.slice(0, 14)}…${hash.slice(-12)}`, ...prev].slice(0, 20));
+      const t = setTimeout(() => reset(), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [isSuccess, hash, reset]);
+
+  useEffect(() => {
+    if (error) {
+      setLog((prev) => [`Error: ${error.message}`, ...prev].slice(0, 20));
+    }
+  }, [error]);
 
   const playTone = useCallback(() => {
     if (typeof window === "undefined") return;

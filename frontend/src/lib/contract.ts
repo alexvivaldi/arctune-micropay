@@ -29,5 +29,5 @@ export const ARC_USDC_ADDRESS: `0x${string}` = normalizeAddress(
 export const DEFAULT_PRICE = "50000000000000000"; // 0.05 USDC, 18 decimals
 
 export function getExplorerUrl(hash: `0x${string}`): string {
-  return `https://explorer.testnet.arc.network/tx/${hash}`;
+  return `https://testnet.arcscan.app/tx/${hash}`;
 }
