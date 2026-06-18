@@ -5,6 +5,7 @@ import Image from "next/image";
 import {
   useApproveUsdc,
   useListen,
+  useTrack,
   useUsdcAllowance,
   useUsdcBalance,
 } from "@/hooks/useMicroTune";
@@ -22,6 +23,8 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
   const { approve, isPending: isApprovePending, isConfirming: isApproveConfirming } =
     useApproveUsdc();
   const { data: balance } = useUsdcBalance();
+  const { data: liveTrack } = useTrack(track.id);
+  const currentTrack = (liveTrack as Track | undefined) ?? track;
 
   const [auto, setAuto] = useState(false);
   const [agentCount, setAgentCount] = useState(0);
@@ -30,7 +33,7 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const price = track.listenPrice;
+  const price = currentTrack.listenPrice;
   const needsApproval = !allowance || allowance < price;
 
   useEffect(() => {
@@ -70,12 +73,12 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
 
   const payForListen = useCallback(() => {
     setLog((prev) => [
-      `Agent: paid ${formatUnits(price, 18)} USDC for #${track.id}`,
+      `Agent: paid ${formatUnits(price, 18)} USDC for #${currentTrack.id}`,
       ...prev,
     ].slice(0, 20));
-    listen(track.id);
+    listen(currentTrack.id);
     setAgentCount((c) => c + 1);
-  }, [listen, price, track.id]);
+  }, [listen, price, currentTrack.id]);
 
   useEffect(() => {
     if (auto) {
@@ -110,9 +113,9 @@ export function AgentPlayer({ track }: AgentPlayerProps) {
             {playing ? "▶" : "◼"}
           </div>
           <div>
-            <p className="text-lg font-bold uppercase tracking-tight">{track.title}</p>
+            <p className="text-lg font-bold uppercase tracking-tight">{currentTrack.title}</p>
             <p className="font-mono text-xs text-gray-400">
-              {formatUnits(track.totalRevenue, 18)} USDC · {track.totalListens.toString()} listens
+              {formatUnits(currentTrack.totalRevenue, 18)} USDC · {currentTrack.totalListens.toString()} listens
             </p>
           </div>
         </div>
