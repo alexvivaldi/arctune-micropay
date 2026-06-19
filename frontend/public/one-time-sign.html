@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArcTune — одноразовая подпись</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
+    h1 {
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 8px;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 24px;
+    }
+    .card {
+      border: 2px solid #fff;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #000;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #fff;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #333;
+    }
+    .row:last-child { border-bottom: none; }
+    .label { color: #888; }
+    .value { font-weight: bold; }
+    .warn {
+      border: 2px solid #fff;
+      background: #fff;
+      color: #000;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    button {
+      border: 2px solid #fff;
+      background: #fff;
+      color: #000;
+      padding: 12px 20px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    button:hover:not(:disabled) {
+      background: #000;
+      color: #fff;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    button.secondary {
+      background: #000;
+      color: #fff;
+    }
+    button.secondary:hover:not(:disabled) {
+      background: #fff;
+      color: #000;
+    }
+    .log {
+      border: 2px solid #fff;
+      padding: 12px;
+      height: 160px;
+      overflow-y: auto;
+      font-size: 12px;
+      color: #888;
+      background: #000;
+    }
+    .log .entry { margin-bottom: 6px; }
+    .log .ok { color: #fff; }
+    .log .err { color: #ff4444; }
+    a { color: #fff; }
+    .mono { font-family: inherit; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ArcTune — одноразовая подпись</h1>
+    <div class="subtitle">Arc Testnet · Chain ID 5042002 · USDC 6 decimals</div>
+
+    <div class="card">
+      <div class="card-title">Кошелек</div>
+      <div class="row">
+        <span class="label">Статус</span>
+        <span class="value" id="account">не подключен</span>
+      </div>
+      <div class="row">
+        <span class="label">Сеть</span>
+        <span class="value" id="chain">—</span>
+      </div>
+      <div style="margin-top:12px">
+        <button id="connectBtn">Подключить MetaMask</button>
+        <button class="secondary" id="switchBtn" disabled>Переключить на Arc Testnet</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Контракт</div>
+      <div class="row">
+        <span class="label">MicroTune</span>
+        <span class="value mono" id="contractAddr">0x208A9b35225F3aC671F9e21B9ab14FB953F94c90</span>
+      </div>
+      <div class="row">
+        <span class="label">Владелец</span>
+        <span class="value mono" id="ownerAddr">—</span>
+      </div>
+      <div class="row">
+        <span class="label">Цена по умолчанию</span>
+        <span class="value mono" id="defaultPrice">—</span>
+      </div>
+      <div class="row">
+        <span class="label">Трек #1</span>
+        <span class="value mono" id="trackTitle">—</span>
+      </div>
+      <div class="row">
+        <span class="label">Текущая цена трека #1</span>
+        <span class="value mono" id="trackPrice">—</span>
+      </div>
+      <div class="row">
+        <span class="label">Исполнитель трека #1</span>
+        <span class="value mono" id="trackArtist">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Действия (подпись из кошелька)</div>
+      <p style="color:#888; margin-top:0;">
+        Чтобы платформа работала, цена трека #1 должна быть 0.05 USDC = 50000 (6 decimals).<br>
+        Нажми кнопку и подпиши транзакцию в MetaMask.
+      </p>
+      <button id="fixPriceBtn" disabled>Исправить цену трека #1 на 0.05 USDC</button>
+      <button class="secondary" id="fixDefaultBtn" disabled>Зафиксировать defaultPrice 0.05 USDC</button>
+      <button id="approveBtn" disabled>Approve 0.05 USDC для контракта</button>
+      <button id="listenBtn" disabled>Тестовый listen трека #1</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Лог</div>
+      <div class="log" id="log">
+        <div class="entry">Подключи кошелек и нажми нужную кнопку.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MICROTUNE = "0x208A9b35225F3aC671F9e21B9ab14FB953F94c90";
+    const USDC = "0x3600000000000000000000000000000000000000";
+    const ARC_CHAIN_ID = 5042002;
+    const ARC_RPC = "https://rpc.testnet.arc.network";
+    const EXPLORER = "https://testnet.arcscan.app";
+    const USDC_DECIMALS = 6;
+    const CORRECT_PRICE = 50000n;
+
+    const abi = [
+      "function defaultPrice() view returns (uint256)",
+      "function owner() view returns (address)",
+      "function getTrack(uint256) view returns (tuple(uint256 id, address artist, string title, string metadataURI, uint256 listenPrice, uint256 totalListens, uint256 totalRevenue, address[] beneficiaries, uint256[] shares))",
+      "function setTrackPrice(uint256 trackId, uint256 newPrice)",
+      "function setDefaultPrice(uint256 newPrice)",
+      "function listen(uint256 trackId)",
+      "function usdc() view returns (address)",
+      { "name": "TrackRegistered", "type": "event", "inputs": [] },
+    ];
+
+    const erc20Abi = [
+      "function approve(address spender, uint256 amount) returns (bool)",
+      "function allowance(address owner, address spender) view returns (uint256)",
+      "function balanceOf(address account) view returns (uint256)",
+      "function decimals() view returns (uint8)",
+    ];
+
+    let provider = null;
+    let signer = null;
+    let contract = null;
+    let usdcContract = null;
+    let account = null;
+
+    const $ = (id) => document.getElementById(id);
+    const log = (msg, type = "") => {
+      const entry = document.createElement("div");
+      entry.className = `entry ${type}`;
+      entry.textContent = `${new Date().toLocaleTimeString()} — ${msg}`;
+      $("log").prepend(entry);
+    };
+
+    const toUsdc = (value) => (Number(value) / 10 ** USDC_DECIMALS).toString();
+
+    async function switchChain() {
+      if (!window.ethereum) return log("MetaMask не найден", "err");
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0x" + ARC_CHAIN_ID.toString(16) }],
+        });
+        log("Сеть переключена на Arc Testnet", "ok");
+      } catch (e) {
+        if (e.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: "0x" + ARC_CHAIN_ID.toString(16),
+                chainName: "Arc Testnet",
+                rpcUrls: [ARC_RPC],
+                nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+                blockExplorerUrls: [EXPLORER],
+              }],
+            });
+          } catch (addErr) {
+            log("Не удалось добавить сеть: " + addErr.message, "err");
+          }
+        } else {
+          log("Ошибка переключения сети: " + e.message, "err");
+        }
+      }
+    }
+
+    async function refresh() {
+      if (!provider || !contract) return;
+      try {
+        const owner = await contract.owner();
+        $("ownerAddr").textContent = owner;
+        const defaultPrice = await contract.defaultPrice();
+        $("defaultPrice").textContent = `${defaultPrice} (${toUsdc(defaultPrice)} USDC)`;
+        const track = await contract.getTrack(1);
+        $("trackTitle").textContent = track.title;
+        $("trackPrice").textContent = `${track.listenPrice} (${toUsdc(track.listenPrice)} USDC)`;
+        $("trackArtist").textContent = track.artist;
+
+        const isOwner = account && account.toLowerCase() === owner.toLowerCase();
+        const needsPriceFix = track.listenPrice !== CORRECT_PRICE;
+        const needsDefaultFix = defaultPrice !== CORRECT_PRICE;
+        const isArc = await checkChain();
+
+        $("fixPriceBtn").disabled = !isArc || !isOwner || !needsPriceFix;
+        $("fixDefaultBtn").disabled = !isArc || !isOwner || !needsDefaultFix;
+        $("approveBtn").disabled = !isArc || !account;
+        $("listenBtn").disabled = !isArc || !account;
+
+        if (needsPriceFix && isOwner) {
+          log("Цена трека #1 сломана: " + track.listenPrice + ". Нажми 'Исправить цену'.", "err");
+        } else if (!needsPriceFix) {
+          log("Цена трека #1 корректна: 0.05 USDC", "ok");
+        }
+      } catch (e) {
+        log("Ошибка чтения контракта: " + e.message, "err");
+      }
+    }
+
+    async function checkChain() {
+      if (!window.ethereum) return false;
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      const numeric = parseInt(chainId, 16);
+      $("chain").textContent = numeric === ARC_CHAIN_ID ? "Arc Testnet (5042002)" : "Chain ID " + numeric;
+      return numeric === ARC_CHAIN_ID;
+    }
+
+    async function connect() {
+      if (!window.ethereum) {
+        log("MetaMask не установлен", "err");
+        return;
+      }
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const browserProvider = new ethers.BrowserProvider(window.ethereum);
+        const isArc = await checkChain();
+        if (!isArc) {
+          log("Сеть не Arc Testnet. Нажми 'Переключить на Arc Testnet'.", "err");
+          $("switchBtn").disabled = false;
+          $("connectBtn").disabled = true;
+          return;
+        }
+        signer = await browserProvider.getSigner();
+        account = await signer.getAddress();
+        provider = browserProvider;
+        contract = new ethers.Contract(MICROTUNE, abi, signer);
+        usdcContract = new ethers.Contract(USDC, erc20Abi, signer);
+        $("account").textContent = account;
+        $("switchBtn").disabled = true;
+        $("connectBtn").disabled = true;
+        log("Кошелек подключен: " + account, "ok");
+        await refresh();
+      } catch (e) {
+        log("Ошибка подключения: " + e.message, "err");
+      }
+    }
+
+    async function sendTx(fn, btn, successMsg) {
+      btn.disabled = true;
+      try {
+        const tx = await fn();
+        log("Транзакция отправлена: " + tx.hash, "ok");
+        log("Ожидание подтверждения...");
+        const receipt = await tx.wait();
+        log("Подтверждено в блоке " + receipt.blockNumber + ". " + successMsg, "ok");
+        log("Ссылка: " + EXPLORER + "/tx/" + tx.hash, "ok");
+      } catch (e) {
+        log("Ошибка: " + e.message, "err");
+      } finally {
+        btn.disabled = false;
+        await refresh();
+      }
+    }
+
+    $("connectBtn").addEventListener("click", connect);
+    $("switchBtn").addEventListener("click", async () => {
+      await switchChain();
+      await connect();
+    });
+
+    $("fixPriceBtn").addEventListener("click", () => {
+      sendTx(
+        () => contract.setTrackPrice(1, CORRECT_PRICE),
+        $("fixPriceBtn"),
+        "Цена трека #1 исправлена на 0.05 USDC"
+      );
+    });
+
+    $("fixDefaultBtn").addEventListener("click", () => {
+      sendTx(
+        () => contract.setDefaultPrice(CORRECT_PRICE),
+        $("fixDefaultBtn"),
+        "Default price зафиксирован на 0.05 USDC"
+      );
+    });
+
+    $("approveBtn").addEventListener("click", () => {
+      sendTx(
+        () => usdcContract.approve(MICROTUNE, CORRECT_PRICE),
+        $("approveBtn"),
+        "USDC approve для MicroTune выдан"
+      );
+    });
+
+    $("listenBtn").addEventListener("click", () => {
+      sendTx(
+        () => contract.listen(1),
+        $("listenBtn"),
+        "Listen трека #1 выполнен"
+      );
+    });
+
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", () => {
+        account = null;
+        $("account").textContent = "не подключен";
+        $("connectBtn").disabled = false;
+        $("switchBtn").disabled = true;
+        connect();
+      });
+      window.ethereum.on("chainChanged", () => {
+        window.location.reload();
+      });
+    }
+  </script>
+</body>
+</html>
