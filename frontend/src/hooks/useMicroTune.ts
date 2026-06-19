@@ -4,11 +4,9 @@ import {
   useReadContracts,
   useWriteContract,
   useWaitForTransactionReceipt,
-  useDeployContract,
 } from "wagmi";
 import {
   MICROTUNE_ABI,
-  MICROTUNE_BYTECODE,
   getMicroTuneAddress,
   isMicroTuneConfigured,
   ERC20_ABI,
@@ -151,31 +149,3 @@ export function useUsdcBalance() {
   });
 }
 
-export function useDeployMicroTune() {
-  const { deployContract, data: hash, error, isPending } = useDeployContract();
-  const { data: receipt, isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
-
-  const deploy = useCallback(
-    (usdcAddress: `0x${string}`, defaultPrice: bigint) => {
-      deployContract({
-        abi: MICROTUNE_ABI,
-        bytecode: MICROTUNE_BYTECODE,
-        args: [usdcAddress, defaultPrice],
-      });
-    },
-    [deployContract]
-  );
-
-  return {
-    deploy,
-    hash,
-    receipt,
-    contractAddress: (receipt?.contractAddress as `0x${string}` | undefined) ?? null,
-    error,
-    isPending,
-    isConfirming,
-    isSuccess,
-  };
-}

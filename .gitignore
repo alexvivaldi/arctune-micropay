@@ -20,3 +20,6 @@ deployments
 *.jpg
 *.png
 *.jpeg
+
+.vercel
+.env*.local

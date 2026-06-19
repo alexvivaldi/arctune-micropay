@@ -4,7 +4,6 @@ import artifact from "@/abis/MicroTune.json";
 import { ERC20_ABI as erc20Abi } from "@/lib/erc20";
 
 export const MICROTUNE_ABI = (artifact as { abi: Abi }).abi;
-export const MICROTUNE_BYTECODE = (artifact as { bytecode: `0x${string}` }).bytecode;
 export const ERC20_ABI = erc20Abi;
 
 export function getMicroTuneAddress(): `0x${string}` | null {

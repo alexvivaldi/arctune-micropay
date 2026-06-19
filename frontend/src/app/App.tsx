@@ -10,8 +10,6 @@ import { RoyaltyBot } from "@/components/RoyaltyBot";
 import { RegisterTrack } from "@/components/RegisterTrack";
 import { SetDefaultPrice } from "@/components/SetDefaultPrice";
 import { Track } from "@/types/track";
-import { useMicroTuneConfigured } from "@/hooks/useMicroTune";
-import { DeployContract } from "@/components/DeployContract";
 
 function FeatureCard({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
   return (
@@ -28,11 +26,6 @@ function FeatureCard({ icon, title, children }: { icon: string; title: string; c
 export default function App() {
   const { isConnected } = useAccount();
   const [selected, setSelected] = useState<Track | null>(null);
-  const configured = useMicroTuneConfigured();
-
-  if (!configured) {
-    return <DeployContract />;
-  }
 
   return (
     <div className="flex min-h-screen flex-col bg-black text-white">

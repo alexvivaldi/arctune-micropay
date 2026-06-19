@@ -63,40 +63,29 @@ The frontend will be at `http://localhost:3000` and the local node at `http://12
 
 ---
 
-## Deploy to Arc Testnet
+## Contract
 
-### Option A — deploy from the UI (recommended)
+The live MicroTune contract is deployed once on Arc Testnet and shared by all users:
 
-1. Open https://arctune.vercel.app.
-2. Connect your wallet on Arc Testnet.
-3. Click **Deploy MicroTune contract** and sign the transaction.
-4. Copy the deployed contract address and set it as `NEXT_PUBLIC_CONTRACT_ADDRESS` in your Vercel env / `frontend/.env.local`.
-5. Rebuild / redeploy the frontend.
+```text
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x208A9b35225F3aC671F9e21B9ab14FB953F94c90
+NEXT_PUBLIC_USDC_ADDRESS=0x3600000000000000000000000000000000000000
+```
 
-### Option B — deploy via Hardhat
+Everyone connects to the same contract. Artists register tracks, listeners stream, and the contract splits USDC instantly.
 
-1. Copy `.env.example` to `.env` in the project root and to `frontend/.env.local`.
-2. Fill in your **wallet private key** and **WalletConnect project ID**.
-3. Run the deploy script:
+### Deploy a new contract via Hardhat (owner only)
+
+If you ever need a fresh contract, use the Hardhat script:
 
 ```bash
+# 1. Copy .env.example to .env and frontend/.env.local
+# 2. Fill in ARC_PRIVATE_KEY and NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+# 3. Run the deploy script
 npm run deploy --workspace=contracts
 ```
 
-4. The script prints the deployed contract address and saves it to `contracts/deployments/arctestnet.json`.
-5. Set the contract address as `NEXT_PUBLIC_CONTRACT_ADDRESS`:
-
-```env
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x...your_deployed_address...
-NEXT_PUBLIC_USDC_ADDRESS=0x3600000000000000000000000000000000000000
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...your_project_id...
-```
-
-6. Rebuild the frontend:
-
-```bash
-npm run build
-```
+The deployed address is saved to `contracts/deployments/arctestnet.json`. Update `NEXT_PUBLIC_CONTRACT_ADDRESS` in your Vercel env and `frontend/.env.local`, then rebuild.
 
 ---
 
